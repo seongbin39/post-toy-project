@@ -31,6 +31,7 @@
 - Thymeleaf
 - Bootstrap 5
 - Lombok
+![아키텍쳐](https://github.com/seongbin39/post-toy-project/assets/85536059/f59eb63c-caa8-4fe4-bd89-569666bcdcf8)
 
 ## 3. 프로젝트 기능
 
@@ -130,3 +131,4 @@
     - Redis 사용하여 세션을 관리
 
 ## 7.ERD
+![ERD](https://github.com/seongbin39/post-toy-project/assets/85536059/395a049e-9d2e-49a9-988d-fab45d45d8c2)
