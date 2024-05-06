@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}">
+<head>
+  <title>회원정보 수정</title>
+</head>
+<div layout:fragment="content" class="content">
+  <main class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin/main">Home</a></li>
+            <li class="breadcrumb-item" aria-current="page">회원관리</li>
+            <li class="breadcrumb-item active" aria-current="page">회원정보 수정</li>
+          </ol>
+        </nav>
+        <div class="row mb-3">
+          <div class="col-12">
+            <strong class="fs-4">회원정보</strong>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <form id="user-form" method="post" th:action="@{/admin/users/{id}(id=${user.id})}" th:object="${user}">
+              <input type="hidden" id="userId" th:value="${user.id}">
+              <div class="row justify-content-center align-items-center px-2 justify-content-lg-around">
+                <div class="col-6 col-lg-3">
+                  <div class="row justify-content-center">
+                    <img class="mb-2 p-2 d-block rounded-circle object-fit-cover" id="profileImg"
+                         th:src="${user.getPicture()} ? ${user.getPicture()} : '/images/profile.png'"
+                         alt="profile" style="max-width: 150px; max-height: 150px; aspect-ratio: 1;">
+                    <button type="button" class="btn btn-success fw-bold px-3 py-1" onclick="uploadImg()">이미지 업로드</button>
+                    <button type="button" class="btn text-success fw-bold px-3 py-1 mt-2" onclick="removeImg()">이미지 제거</button>
+                  </div>
+                </div>
+                <div class="row-cols-sm-12 col-lg-6 py-3">
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">사용자명</span>
+                    <input type="text" class="form-control" id="username" th:field="*{username}" required>
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">아이디</span>
+                    <input type="email" class="form-control" id="email" th:field="*{email}" required readonly>
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">권한</span>
+                    <select class="form-select" id="role" th:field="*{role}" required>
+                      <option value="USER">일반 사용자</option>
+                      <option value="ADMIN">관리자</option>
+                    </select>
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">가입일</span>
+                    <input type="text" class="form-control" id="createdDate" th:field="*{createdDate}" readonly>
+                  </div>
+                </div>
+              </div>
+              <div class="row-cols-lg-auto text-lg-end text-center">
+                <button type="submit" class="btn btn-primary">수정</button>
+                <a href="/admin/users/list" class="btn btn-secondary">취소</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    function uploadImg() {
+      var input = document.createElement('input');
+      var id = document.getElementById('userId').value;
+      console.log('id = ' + id)
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function (e) {
+        var formData = new FormData();
+        var file = e.target.files[0];
+        formData.append('file', file);
+        formData.append('id', id);
+
+        $.ajax({
+          type: 'POST',
+          url: `/admin/users/profileImg/${id}`,
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function (response) {
+            alert('이미지가 업로드되었습니다.');
+            location.reload();
+          },
+          error: function (response) {
+            alert('이미지 업로드에 실패했습니다.');
+          }
+
+        })
+      };
+      input.click();
+    }
+    function removeImg() {
+      var id = document.getElementById('userId').value;
+
+      fetch(`/admin/users/profileImg/${id}`, {
+        method: 'DELETE',
+      }).then(response => {
+        if (response.ok) {
+          alert('이미지가 삭제되었습니다.');
+          location.reload();
+        } else {
+          alert('이미지 삭제에 실패했습니다.');
+        }
+      });
+    }
+  </script>
+</div>
+</html>

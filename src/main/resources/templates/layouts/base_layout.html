@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      data-bs-theme="light"
+>
+<head>
+  <meta charset="UTF-8">
+  <title layout:title-pattern="$CONTENT_TITLE"></title>
+  <meta name="viewport"
+        content="width=device-width, maximum-scale=1.0, minimum-scale=1, user-scalable=yes,initial-scale=1.0"/>
+  <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+          integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<th:block th:replace="~{fragments/header :: headerFragment}"/>
+<div class="" style="height: 100%; min-height: 100%; padding-bottom: 50px">
+  <th:block layout:fragment="content"/>
+</div>
+<th:block th:replace="~{fragments/footer :: footerFragment}"/>
+
+<script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

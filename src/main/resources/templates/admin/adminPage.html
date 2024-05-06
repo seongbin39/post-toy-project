@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/admin_layout}">
+<head>
+  <title>관리자</title>
+  <script th:inline="javascript">
+
+  </script>
+</head>
+<div layout:fragment="content" class="container">
+  <main class="row justify-content-center mt-3">
+    <section class="col">
+      <h1 th:text="${user.username + '님 환영합니다.'}"></h1>
+      <div class="row mt-3">
+        <div class="col-12 col-md-6 my-md-0 my-2">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">회원관리</h5>
+              <p class="card-text">회원 목록을 확인하고 수정할 수 있습니다.</p>
+              <a href="/admin/users/list" class="btn btn-primary">회원목록</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 my-md-0 my-2">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">공지사항</h5>
+              <p class="card-text">공지사항을 관리할 수 있습니다.</p>
+              <a href="/admin/notice/write" class="btn btn-primary">공지작성</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+
+</html>

@@ -1,0 +1,7 @@
+#mode-toggle {
+    transition: transform 0.5s;
+}
+
+#mode-toggle.rotate {
+    transform: rotate(-45deg);
+}

@@ -1,0 +1,86 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<header th:fragment="adminHeader">
+  <nav class="navbar navbar-expand-lg bg-dark bg-opacity-10">
+    <div class="container">
+      <button class="btn btn-success btn-sm d-lg-none d-md-block" type="button" data-bs-toggle="offcanvas"
+              data-bs-target="#MobileMenu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="offcanvas offcanvas-start" data-bs-backdrop="static" id="MobileMenu">
+        <div class="offcanvas-header">
+          <a href="/">
+            <i class="fa-solid fa-house"></i>
+          </a>
+          <h5 class="offcanvas-title fw-semibold">메뉴</h5>
+          <button type="button" class="btn btn-close btn-sm" data-bs-dismiss="offcanvas">
+          </button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/main"><span>메인</span></a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                회원관리
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="/admin/users/list">회원목록</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                공지 관리
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="/admin/notice/list">공지 목록</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="/admin/notice/write">공지 작성</a>
+                </li>
+              </ul>
+            </li>
+<!--            <li class="nav-item dropdown">-->
+<!--              <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">-->
+<!--                게시글관리-->
+<!--              </a>-->
+<!--              <ul class="dropdown-menu">-->
+<!--                <li>-->
+<!--                  <a class="dropdown-item" href="/admin/users/list">게시글 작성</a>-->
+<!--                </li>-->
+<!--              </ul>-->
+<!--            </li>-->
+          </ul>
+        </div>
+      </div>
+      <div class="dropdown" sec:authorize="isAuthenticated()">
+        <!-- 사용자 이름, 프로필 아이콘, 드롭다운 토글 -->
+        <a href="#" class="d-block link-body-emphasis text-decoration-none"
+           data-bs-toggle="dropdown" aria-expanded="false">
+          <img th:src="${#authentication.getPrincipal().picture} ?
+              ${#authentication.getPrincipal().picture} : '/images/profile.png'"
+               class="rounded-circle" alt="" width="32" height="32">
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end mt-2">
+          <li class="dropdown-item text-center">
+            <span sec:authentication="name" class="fw-bold me-2 pt-1"></span>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li class="dropdown-item">
+            <a class="dropdown-item" href="/user/profile">프로필</a>
+          </li>
+          <li class="dropdown-item">
+            <a class="dropdown-item" th:href="@{/logout}">로그아웃</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+</header>
+</html>

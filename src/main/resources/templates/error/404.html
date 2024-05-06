@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base_layout}">
+<head>
+  <title>404 NOT FOUND</title>
+</head>
+
+<div layout:fragment="content" class="content">
+  <section class="container">
+    <div class="row text-center">
+      <h1 class="col my-3">요청하신 페이지를 찾을 수 없습니다.</h1>
+    </div>
+    <div class="row justify-content-center">
+      <img src="/images/empty.gif" class="col col-xl-4 col-lg-6 col-md-8 col-sm-12">
+    </div>
+    <div class="row justify-content-center my-3">
+      <button type="button" class="btn btn-secondary col col-md-2 col-sm-6" onclick="location.href='/home'">홈으로</button>
+    </div>
+  </section>
+</div>
+
+</html>

@@ -1,0 +1,71 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<header th:fragment="headerFragment">
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <div class="d-flex">
+      <a href="/" class="navbar-brand d-none d-md-block">
+        <img src="/images/logo.png" alt="logo" class="rounded-circle" width="30" height="30">
+        SEONG
+      </a>
+      <button class="btn btn-success btn-sm d-lg-none d-md-block" type="button" data-bs-toggle="offcanvas"
+              data-bs-target="#MobileMenu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="offcanvas offcanvas-start flex-grow-0" data-bs-backdrop="static" id="MobileMenu">
+        <div class="offcanvas-header">
+          <a href="/">
+            <i class="fa-solid fa-house"></i>
+          </a>
+          <h5 class="offcanvas-title fw-semibold">메뉴</h5>
+          <button type="button" class="btn btn-close btn-sm" data-bs-dismiss="offcanvas">
+          </button>
+        </div>
+        <div class="offcanvas-body">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-md-center fs-5">
+            <li class="nav-item">
+              <a href="/post/list" class="nav-link">게시판</a>
+            </li>
+            <th:block sec:authorize="hasRole('ADMIN')">
+              <li><a href="/admin/main" class="nav-link">관리자</a></li>
+            </th:block>
+          </ul>
+        </div>
+      </div>
+      </div>
+      <div class="d-md-none d-block">
+        <a href="/" class="navbar-brand m-0">
+          <img src="/images/logo.png" alt="logo" class="rounded-circle" width="30" height="30"> SEONG
+        </a>
+      </div>
+      <div class="dropdown" sec:authorize="isAuthenticated()">
+        <!-- 사용자 이름, 프로필 아이콘, 드롭다운 토글 -->
+        <a href="#" class="d-block link-body-emphasis text-decoration-none"
+           data-bs-toggle="dropdown" aria-expanded="false">
+          <img th:src="${#authentication.getPrincipal().picture} ?
+              ${#authentication.getPrincipal().picture} : '/images/profile.png'"
+               class="rounded-circle" alt="" width="32" height="32">
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end mt-2">
+          <li class="dropdown-item text-center">
+            <span sec:authentication="name" class="fw-bold me-2 pt-1"></span>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li class="dropdown-item">
+            <a class="dropdown-item" href="/user/profile">프로필</a>
+          </li>
+          <li class="dropdown-item">
+            <a class="dropdown-item" th:href="@{/logout}">로그아웃</a>
+          </li>
+        </ul>
+      </div>
+      <div sec:authorize="!isAuthenticated()">
+        <a class="link-dark link-underline-opacity-0 fw-bold mx-2" href="/login">로그인</a>
+<!--        <a class="link-dark link-underline-opacity-0 fw-bold mx-2" href="/signup">회원가입</a>-->
+      </div>
+    </div>
+  </nav>
+
+<!--  <script src="/js/header.js"></script>-->
+</header>
+
+</html>

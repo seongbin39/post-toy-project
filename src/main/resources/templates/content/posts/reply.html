@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base_layout}">
+<div>
+  <th:block th:if="${replyList != null && replyList.size() > 0}">
+    <div class="mb-3" id="reply">
+      <p class="my-3 fw-bold"><i class="fas fa-comment me-2"></i>답글</p>
+
+      <div class="border border-1 border-secondary rounded-2 p-2 mb-2" th:each="reply : ${replyList}">
+        <div class="row justify-content-between">
+          <div class="col-auto">
+            <img th:src="${reply.author.picture != null ? reply.author.picture : '/images/profile.png' }"
+                 class="rounded-circle" width="30" height="30"
+                 alt="profile image">
+            <span class="fw-bold" th:text="${reply.author.username}"></span>
+          </div>
+
+          <div class="col-auto" th:if="@{ ${#authentication.principal.id == reply.author.id
+                           || #authorization.expression('hasRole(''ROLE_ADMIN'')')} }">
+            <button type="button" class="btn btn-sm" data-bs-toggle="modal" th:attr="data-bs-reply-id=|${reply.id}"
+                    data-bs-target="#deleteReplyModal">삭제</button>
+            <button type="button" class="btn btn-sm" th:onclick="updateReplyBtn([[${reply.id}]])" id="replyModifyBtn">수정
+            </button>
+          </div>
+
+        </div>
+        <!-- 댓글 본문 -->
+        <div class="d-md-flex align-items-center">
+          <th:block th:if="${reply.taggedUser.username != null}">
+            <span th:text="${'@ ' + reply.taggedUser.username + '님에게'}" class="text-muted me-2"></span>
+          </th:block>
+          <p th:id="'reply-content-'+${reply.id}" class="my-2" th:text="${reply.content}"></p>
+        </div>
+
+        <span class="text-muted" th:text="${#temporals.format(reply.createdDate, 'yyyy.MM.dd HH:mm')}"></span>
+        <span th:onclick="replyTag([[${reply.parentCommentId}]], [[${reply.author.username}]])">
+          <i class="fa-solid fa-plus"></i> 답글 달기</span>
+
+        <!-- 답글 삭제 모달 -->
+        <div class="modal fade text-dark" id="deleteReplyModal" tabindex="-1"
+             aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteReplyModalLabel">댓글 삭제</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                댓글을 삭제 하시겠습니까?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button id="delete-reply-btn" type="submit" class="btn btn-danger">
+                  삭제
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 답글 삭제 모달 끝-->
+      </div>
+    </div>
+  </th:block>
+</div>
+</html>

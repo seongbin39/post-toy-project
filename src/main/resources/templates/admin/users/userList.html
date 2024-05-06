@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}">
+<head>
+  <title>회원목록</title>
+</head>
+<div layout:fragment="content" class="container col-xl-10">
+  <div class="row">
+    <div class="col-12 pt-3">
+      <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="#">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">회원관리</li>
+          <li class="breadcrumb-item active" aria-current="page">회원목록</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+  <div class="row d-none d-md-grid mt-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle m-0">
+              <thead>
+              <tr>
+                <th scope="col" class="col-1">번호</th>
+                <th scope="col" class="col-2 col-lg-1">사용자명</th>
+                <th scope="col" class="col-4 col-lg-2">이메일</th>
+                <th scope="col" class="col-3 col-lg-2">가입일</th>
+                <th scope="col" class="col-2 col-lg-1">권한</th>
+                <th scope="col" class="col-2 col-lg-1">관리</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="user : ${userList}">
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.email}"></td>
+                <td th:text="${#temporals.format(user.createdDate, 'yyyy.MM.dd')}" class="text-center"></td>
+                <td th:text="${user.role}" class="text-center"></td>
+                <td class="text-center">
+                  <a th:href="@{'/admin/users/' + ${user.id}}" class="btn btn-sm btn-info">상세</a>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--모바일 화면 -->
+  <div class="container py-4 d-md-none">
+    <div class="row">
+      <div class="col-12">
+        <p th:text="'총 회원수 : ' + ${userList.totalElements}"></p>
+      </div>
+    </div>
+    <div class="row">
+      <!-- 회원 카드 시작 -->
+      <div class="col-12 col-md-6 col-lg-4 mb-3">
+        <div class="card my-2" th:each="user : ${userList}">
+          <div class="card-body py-1">
+            <h5 class="card-title" th:text="${user.email}"></h5>
+            <div class="row justify-content-center align-items-center">
+              <p class="card-text text-muted col-9"
+                 th:text="${user.username + ' ' + #temporals.format(user.createdDate, 'yy.MM.dd') + ' ' + user.role }">
+                가입일</p>
+              <a th:href="@{'/admin/users/' + ${user.id}}" class="btn btn-sm btn-info col-3">상세</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--모바일 화면 끝-->
+  <!--페이징-->
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center mt-3"
+        th:with="start=${(userList.number/5).intValue()*5 + 1},
+                    last=(${start + 4 < userList.totalPages ? start + 4 : userList.totalPages})">
+      <!--처음-->
+      <li class="page-item">
+        <a class="page-link" th:href="@{/admin/users/list(size=${userList.size}, page=${0}, sort=${'id,desc'})}"
+           aria-label="First">
+          <span aria-hidden="true">First</span>
+        </a>
+      </li>
+
+      <!--이전-->
+      <li class="page-item" th:class="${userList.first} ? 'disabled'">
+        <a class="page-link"
+           th:href="${userList.first} ? '#' : @{/admin/users/list(size=${userList.size}, page=${userList.number - 1}, sort=${'id,desc'})}"
+           aria-label="Previous">
+          <span aria-hidden="true">&lt;</span>
+        </a>
+      </li>
+
+      <li class="page-item" th:each="page: ${#numbers.sequence(start, last)}"
+          th:class="${page == userList.number + 1} ? 'active'">
+        <a class="page-link" th:text="${page}"
+           th:href="@{/admin/users/list(size=${userList.size}, page=${page - 1}, sort=${'id,desc'})}"></a>
+      </li>
+
+      <!--다음-->
+      <li class="page-item" th:class="${userList.last} ? 'disabled'">
+        <a class="page-link"
+           th:href="${userList.last} ? '#' : @{/admin/users/list(size=${userList.size}, page=${userList.number + 1}, sort=${'id,desc'})}"
+           aria-label="Next">
+          <span aria-hidden="true">&gt;</span>
+        </a>
+      </li>
+
+      <!--마지막-->
+      <li class="page-item">
+        <a class="page-link"
+           th:href="@{/admin/users/list(size=${userList.size}, page=${userList.totalPages - 1}, sort=${'id,desc'})}"
+           aria-label="Last">
+          <span aria-hidden="true">Last</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <script>
+    var deleteBtn = document.querySelectorAll('#delete-user');
+    deleteBtn.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var userId = btn.getAttribute('data');
+
+        if (confirm('정말 삭제하시겠습니까?')) {
+          $.ajax({
+            type: 'DELETE',
+            url: '/admin/users/' + userId,
+          }).done(function () {
+            alert('삭제되었습니다.');
+            window.location.reload();
+          }).fail(function () {
+            alert('삭제에 실패했습니다.');
+          });
+        }
+      });
+    });
+  </script>
+</div>
+</html>

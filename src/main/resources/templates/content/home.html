@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base_layout}">
+<head>
+  <title>SEONG</title>
+</head>
+
+<div layout:fragment="content" class="container">
+
+  <!-- main carousel -->
+  <div id="homeCarousel" class="carousel slide overflow-hidden" style="height: 300px" data-bs-ride="true">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="0" class="active"
+              aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner top-50 start-50 translate-middle">
+      <div class="carousel-item active" data-bs-interval="3000">
+        <div class="container text-center" style="background-image: url('/images/landscape.jpg');">
+          <h3 class="mt-3">환영합니다.</h3>
+          <span class="text-break">이 사이트는 Spring Boot, Thymeleaf를 사용하여 제작되었습니다.</span>
+          <a href="https://github.com/seongbin39/post-service">GITHUB</a>
+        </div>
+        <div class="carousel-caption d-none d-md-block">
+          <h5>First slide label</h5>
+          <p>Some representative placeholder content for the first slide.</p>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Second slide label</h5>
+          <p>Some representative placeholder content for the second slide.</p>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Third slide label</h5>
+          <p>Some representative placeholder content for the third slide.</p>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Prev</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+
+  <div class="row row-cols-md-2 border-top border-bottom">
+    <div class="col-12 col-md-6">
+      <h3 class="mt-3">공지사항</h3>
+      <table class="table table-striped">
+        <tbody>
+        <tr th:each="notice : ${noticeList}">
+          <th scope="row" th:text="공지" class="d-none d-md-block text-danger"></th>
+          <td>
+            <a th:href="@{/post/{id}(id=${notice.id})}"
+               class="text-decoration-none fw-bold"
+               style="color: var(--bs-table-color)">
+              <span th:text="${notice.subject}"></span>
+            </a>
+            <th:block th:if="${notice.attachCount > 0}">
+              <i class="fas fa-paperclip me-2"></i>
+            </th:block>
+          </td>
+          <th:block th:if="${notice.author.username != null}">
+            <td th:text="${notice.author.username}"></td>
+          </th:block>
+          <td th:text="${#temporals.format(notice.createdDate, 'yy.MM.dd HH:mm')}" class="text-center"></td>
+          <td th:text="${notice.readCount}" class="text-center d-none d-md-block"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <h3 class="mt-3">최근 게시물</h3>
+      <table class="table table-striped">
+        <tbody>
+        <tr th:each="post : ${postList}">
+          <th scope="row" th:text="${post.id}" class="d-none d-md-block"></th>
+          <td>
+            <a th:href="@{/post/{id}(id=${post.id}, size=${postList.size})}"
+               class="text-decoration-none fw-bold"
+               style="color: var(--bs-table-color)">
+              <span th:text="${post.subject}"></span>
+            </a>
+            <th:block th:if="${post.attachCount > 0}">
+              <i class="fas fa-paperclip me-2"></i>
+            </th:block>
+          </td>
+          <th:block th:unless="${post.author.username != null}">
+            <td th:text="${post.author.username}"></td>
+          </th:block>
+          <th:block th:if="${post.author.username != null}">
+            <td th:text="${post.author.username}"></td>
+          </th:block>
+          <td th:text="${#temporals.format(post.createdDate, 'yy.MM.dd HH:mm')}" class="text-center"></td>
+          <td th:text="${post.readCount}" class="text-center d-none d-md-block"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</html>

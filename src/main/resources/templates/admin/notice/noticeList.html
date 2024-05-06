@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}">
+<head>
+  <title>공지사항 목록</title>
+</head>
+<div layout:fragment="content" class="content">
+  <div class="container mt-3" th:if="${!noticeList.empty}">
+    <form id="viewSize" th:action="@{/admin/notice/list}" method="get" class="d-flex justify-content-end">
+      <select id="sizeSelect" name="size" class="form-select mx-2 w-auto">
+        <option th:each="size : ${#numbers.sequence(5, 30, 5)}"
+                th:value="${size}"
+                th:text="${size + '개씩'}"
+                th:selected="${noticeList.size == size}">
+        </option>
+      </select>
+      <select name="sort" id="sortSelect" class="form-select mx-2 w-auto">
+        <option value="id,desc" th:selected="${sort.equalsIgnoreCase('id,desc')}">최신순</option>
+        <option value="id,asc" th:selected="${sort.equalsIgnoreCase('id,asc')}">오래된순</option>
+        <option value="readCount,desc" th:selected="${sort.equalsIgnoreCase('readCount,desc')}">조회순</option>
+      </select>
+    </form>
+    <div class="row d-none d-md-grid my-3">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <table class="table table-striped table-bordered table-responsive">
+              <thead class="table-header">
+              <tr>
+                <th scope="col" class="col-1"></th>
+                <th scope="col" class="col-4 text-center">제목</th>
+                <th scope="col" class="col-3">작성자</th>
+                <th scope="col" class="col-3 text-center">작성일</th>
+                <th scope="col" class="col-1 text-center">조회</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="notice : ${noticeList}">
+                <th th:if="${notice.notice}" class="text-center" style="color: var(--bs-primary)">공지</th>
+<!--                <th th:unless="${post.notice}" scope="row" th:text="${post.id}"></th>-->
+                <td>
+                  <a th:href="@{/post/{id}(id=${notice.id}, page=${noticeList.number}, size=${noticeList.size}, sort=${sort}, keyword=${searchCondition.keyword}, searchType=${searchCondition.searchType}, searchPeriod=${searchCondition.searchPeriod})}"
+                     class="text-decoration-none fw-bold"
+                     style="color: var(--bs-table-color)">
+                    <span th:text="${notice.subject}"></span>
+                  </a>
+                  <th:block th:if="${notice.attachCount > 0}">
+                    <i class="fas fa-paperclip me-2"></i>
+                  </th:block>
+                </td>
+                <th:block th:unless="${notice.author.username != null}">
+                  <td th:text="${notice.author.username}"></td>
+                </th:block>
+                <th:block th:if="${notice.author.username != null}">
+                  <td th:text="${notice.author.username}"></td>
+                </th:block>
+                <td th:text="${#temporals.format(notice.createdDate, 'yyyy.MM.dd HH:mm')}" class="text-center"></td>
+                <td th:text="${notice.readCount}" class="text-center"></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--모바일 화면 -->
+    <div class="container py-4 d-md-none">
+      <div class="row">
+        <!-- post 카드 시작 -->
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card my-2" th:each="notice : ${noticeList}">
+            <div class="card-body row align-items-center justify-content-between py-1">
+              <a class="col-auto text-decoration-none text-dark" th:href="@{/admin/notice/{id}(id=${notice.id})}">
+                <div class="row card-title align-items-center">
+                  <span th:if="${notice.notice}" class="badge text-bg-info col-auto">공지</span>
+                  <span class="col-auto fw-bold fs-4" th:text="${notice.subject}"></span>
+                  <th:block th:if="${notice.attachCount > 0}">
+                    <i class="col-auto fas fa-paperclip me-2"></i>
+                  </th:block>
+                </div>
+                <div class="row card-text">
+                  <p class="col-auto" th:text="${notice.author.username}"></p>
+                  <p class="text-muted col-auto"
+                     th:text="${#temporals.format(notice.createdDate, 'yy.MM.dd')}"></p>
+                  <p class="text-muted col-auto" th:text="${'조회 ' + notice.readCount}"></p>
+                </div>
+              </a>
+<!--              <div class="col-auto">-->
+<!--                <a th:href="@{/post/{id}(id=${post.id})}" class="btn btn-sm btn-dark opacity-75 h-100"-->
+<!--                   th:text="${'댓글 ' + post.attachCount}">댓글</a>-->
+<!--              </div>-->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--모바일 화면 끝-->
+
+    <!--페이징-->
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center"
+          th:with="start=${(noticeList.number/5).intValue()*5 + 1},
+                    last=(${start + 4 < noticeList.totalPages ? start + 4 : noticeList.totalPages})">
+        <!--처음-->
+        <li class="page-item">
+          <a class="page-link" th:href="@{/admin/notice/list(size=${noticeList.size}, page=${0}, sort=${'id,desc'})}"
+             aria-label="First">
+            <span aria-hidden="true">First</span>
+          </a>
+        </li>
+
+        <!--이전-->
+        <li class="page-item" th:class="${noticeList.first} ? 'disabled'">
+          <a class="page-link"
+             th:href="${noticeList.first} ? '#' : @{/admin/notice/list(size=${noticeList.size}, page=${noticeList.number - 1}, sort=${'id,desc'})}"
+             aria-label="Previous">
+            <span aria-hidden="true">&lt;</span>
+          </a>
+        </li>
+
+        <li class="page-item" th:each="page: ${#numbers.sequence(start, last)}"
+            th:class="${page == noticeList.number + 1} ? 'active'">
+          <a class="page-link" th:text="${page}"
+             th:href="@{/admin/notice/list(size=${noticeList.size}, page=${page - 1}, sort=${'id,desc'})}"></a>
+        </li>
+
+        <!--다음-->
+        <li class="page-item" th:class="${noticeList.last} ? 'disabled'">
+          <a class="page-link"
+             th:href="${noticeList.last} ? '#' : @{/admin/notice/list(size=${noticeList.size}, page=${noticeList.number + 1}, sort=${'id,desc'})}"
+             aria-label="Next">
+            <span aria-hidden="true">&gt;</span>
+          </a>
+        </li>
+
+        <!--마지막-->
+        <li class="page-item">
+          <a class="page-link"
+             th:href="@{/admin/notice/list(size=${noticeList.size}, page=${noticeList.totalPages - 1}, sort=${'id,desc'})}"
+             aria-label="Last">
+            <span aria-hidden="true">Last</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <!--게시글이 없을 때-->
+  <article class="container">
+    <section class="row justify-content-center" th:if="${noticeList.empty}">
+      <figure class="col-10 text-center">
+        <figcaption class="fs-1 fw-bold mb-3">작성된 공지사항이 없습니다.</figcaption>
+        <img src="/images/empty.gif" alt="empty">
+      </figure>
+    </section>
+  </article>
+
+  <!--검색-->
+  <div class="container">
+    <div class="row justify-content-center">
+      <nav class="my-3 col-lg-10">
+        <form action="#" th:action="@{/admin/notice/list}" method="get" class="d-md-flex justify-content-center d-block">
+          <section class="d-flex justify-content-between mb-md-0 mb-3">
+            <select id="searchPeriod" name="searchPeriod" class="form-select mx-1">
+              <option value="all"
+                      th:selected="${searchCondition.searchPeriod == null || searchCondition.searchPeriod.equals('all')}">
+                전체
+              </option>
+              <option value="today"
+                      th:selected="${searchCondition.searchPeriod != null && searchCondition.searchPeriod.equals('today')}">
+                1일
+              </option>
+              <option value="week"
+                      th:selected="${searchCondition.searchPeriod != null && searchCondition.searchPeriod.equals('week')}">
+                1주
+              </option>
+              <option value="month"
+                      th:selected="${searchCondition.searchPeriod != null && searchCondition.searchPeriod.equals('month')}">
+                1달
+              </option>
+            </select>
+            <select id="searchType" name="searchType" class="form-select mx-1">
+              <option value="subject"
+                      th:selected="${searchCondition.searchType == null || searchCondition.searchType.equals('subject')}">
+                제목
+              </option>
+              <option value="content"
+                      th:selected="${searchCondition.searchType != null && searchCondition.searchType.equals('content')}">
+                내용
+              </option>
+              <option value="author"
+                      th:selected="${searchCondition.searchType != null && searchCondition.searchType.equals('author')}">
+                작성자
+              </option>
+            </select>
+          </section>
+          <section class="col-lg-6 d-flex">
+            <input type="text" name="keyword" class="form-control me-2 mx-md-2" autocomplete="off"
+                   th:value="${searchCondition.keyword != null ? searchCondition.keyword : ''}"/>
+            <input type="submit" value="검색" class="btn btn-success me-2"/>
+            <a href="admin/notice/write" class="btn btn-primary col-auto">글쓰기</a>
+          </section>
+        </form>
+      </nav>
+    </div>
+  </div>
+
+  <script>
+    // 페이지 사이즈 선택
+    if (document.getElementById('sizeSelect')) {
+      document.getElementById('sizeSelect').addEventListener('change', function () {
+        document.getElementById('viewSize').submit();
+      });
+    }
+
+    // 정렬 선택
+    if (document.getElementById('sortSelect')) {
+      document.getElementById('sortSelect').addEventListener('change', function () {
+        document.getElementById('viewSize').submit();
+      });
+    }
+  </script>
+</div>
+
+</html>

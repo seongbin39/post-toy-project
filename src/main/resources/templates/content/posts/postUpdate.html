@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base_layout}">
+<head>
+  <title>게시글 수정</title>
+  <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
+  <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/translations/ko.js"></script>
+  <script src="https://ckeditor.com/apps/ckfinder/3.5.0/ckfinder.js"></script>
+  <link rel="stylesheet" href="/css/ckEditor.css"/>
+</head>
+<div layout:fragment="content" class="container">
+  <form id="postForm" enctype="multipart/form-data" th:attr="data-post-id=${post.id}">
+    <!--제목-->
+    <div class="mb-3">
+      <input type="text" class="form-control border-3" id="postTitle" name="subject" placeholder="제목을 입력해주세요"
+             aria-label="제목(Title)" th:value="${post.subject}">
+    </div>
+    <!--에디터-->
+    <textarea name="content" id="editor"></textarea>
+
+    <!--파일 업로드-->
+    <div class="d-block my-3" id="file-inputs">
+      <div>
+        <strong class="my-3">첨부파일</strong>
+        <button type="button" class="btn btn-secondary" onclick="addAttachment()">추가</button>
+      </div>
+
+      <!-- 기존 첨부파일 목록 -->
+      <div class="my-3 card" th:if="${attachmentList != null && attachmentList.size()>0}" id="files">
+        <div th:each="files : ${attachmentList}" th:id="${'file-' + files.id}" class="card-body">
+          <a th:href="${files.fileUrl}"
+             th:text="${files.fileOriName} + ' (' + ${@formatUtil.formatBytes(files.fileSize)} + ')'"
+             class="text-decoration-none text-dark fw-bold"
+          ></a>
+          <button type="button" class="btn btn-close" th:attr="data-fileId=${files.id}"
+                  th:onclick="removeFile([[${files.id}]])"></button>
+        </div>
+      </div>
+    </div>
+  </form>
+  <div class="d-flex justify-content-lg-end justify-content-center">
+    <button class="btn btn-primary me-2" type="button" id="saveButton">저장</button>
+    <button class="btn btn-secondary" type="button" id="cancelButton">취소</button>
+  </div>
+
+
+  <script src="/js/posts/postUpdate.js"></script>
+  <script th:inline="javascript">
+    let editorInstance;
+    ClassicEditor
+      .create(document.querySelector('#editor'), {
+        language: 'ko',
+        placeholder: '글을 작성해주세요',
+        toolbar: {
+          items: [
+            'heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList',
+            '|', 'insertTable', '|', 'imageUpload', '|', 'undo', 'redo'
+          ]
+        },
+        table: {
+          contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+        },
+      })
+      .then(editor => {
+        window.editor = editor;
+        editor.setData(
+          [[${post.content}]]
+        );
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  </script>
+</div>
+</html>

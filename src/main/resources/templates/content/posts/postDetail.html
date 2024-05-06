@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base_layout}">
+<head>
+  <title th:text="${post.subject}"></title>
+</head>
+
+<main layout:fragment="content" class="container">
+  <div class="card">
+    <div class="card-header">
+      <h1 class="card-title" th:text="${post.subject}"></h1>
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <img th:src="${post.author.picture != null ? post.author.picture : '/images/profile.png'}"
+               class="rounded-circle me-2" width="30" height="30" alt="profile image">
+          <p class="text-muted mb-0"
+             th:text="${post.author.username} + ' ' + ${#temporals.format(post.createdDate, 'yyyy.MM.dd HH:mm')}"></p>
+        </div>
+        <p th:text="${'조회수 ' +post.readCount}" class="mb-0"></p>
+      </div>
+
+    </div>
+    <div class="card-body">
+      <!-- 본문 -->
+      <div class="mb-3">
+        <th:block th:utext="${post.content}"></th:block>
+      </div>
+      <!-- 첨부파일 목록 -->
+      <th:block th:if="${attachmentList != null && attachmentList.size()>0}">
+        <div class="mb-3">
+          <p class="my-3 fw-bold"><i class="fas fa-file me-2"></i>첨부파일</p>
+          <div th:each="files : ${attachmentList}" class="d-flex align-items-center mb-2">
+            <div class="overflow-hidden col-lg-1 col-2 me-2" th:if="${files.fileType.contains('image')}">
+              <img th:src="${files.fileUrl}" alt="thumbnail" style="width: 100%; height: 100%; object-fit: cover;"/>
+            </div>
+            <a class="text-decoration-none text-dark fw-bold"
+               th:attr="download=${files.fileOriName}"
+               th:href="${files.fileUrl}"
+               th:text="${files.fileOriName} + ' (' + ${@formatUtil.formatBytes(files.fileSize)} + ')'"
+            ></a>
+          </div>
+        </div>
+      </th:block>
+      <!-- 댓글 목록 -->
+      <!-- 댓글 작성 폼 -->
+      <form id="comment-form" method="post" th:action="@{/api/comment}">
+        <input id="post-id" name="postId" th:value="${post.id}" type="hidden">
+        <input id="user-id" name="author" th:value="${#authentication.principal.id}" type="hidden">
+        <div class="mb-3 card">
+          <div class="card-header">
+            <span class="card-title">댓글작성</span>
+          </div>
+          <div class="card-body">
+            <label for="comment-content" class="text-start mb-2">
+              <img th:src="${#authentication.principal.picture != null ? #authentication.principal.picture : '/images/profile.png'}"
+                  class="rounded-circle" width="30" height="30" alt="profile image">
+              <span class="fw-bold" th:text="${#authentication.principal.username}"></span>
+            </label>
+            <textarea class="form-control" id="comment-content" name="content" placeholder="댓글을 작성해주세요."
+                      rows="2"></textarea>
+          </div>
+          <div class="card-footer d-flex justify-content-end">
+            <button type="submit" class="btn btn-sm btn-success">등록</button>
+          </div>
+        </div>
+      </form>
+      <!-- 댓글 -->
+      <th:block th:if="${commentList != null && commentList.size() > 0}">
+        <div class="mb-3">
+          <p class="my-3 fw-bold"><i class="fas fa-comment me-2"></i>댓글</p>
+
+          <div th:each="comment : ${commentList}" th:if="${comment.author != null}" th:id="'comment-' + ${comment.id}"
+               class="border border-1 border-secondary rounded-2 p-2 mb-2">
+            <div class="row justify-content-between">
+              <div class="col-auto">
+                <img th:src="${comment.author.picture != null ? comment.author.picture : '/images/profile.png' }"
+                     class="rounded-circle" width="30" height="30"
+                     alt="profile image">
+                <span class="fw-bold" th:text="${comment.author.username}"></span>
+              </div>
+              <div class="col-auto" th:if="@{ ${#authentication.principal.id == comment.author.id
+                           || #authorization.expression('hasRole(''ROLE_ADMIN'')')} }">
+                <button class="btn btn-sm" data-bs-target="#deleteCommentModal" data-bs-toggle="modal"
+                        th:data-bs-comment-id="${comment.id}" type="button">삭제</button>
+                <button class="btn btn-sm" id="modifyBtn" th:onclick="modifyBtn([[${comment.id}]])" type="button">수정
+                </button>
+              </div>
+            </div>
+            <!-- 댓글 본문 -->
+            <p class="my-2" th:id="'comment-content-' + ${comment.id}" th:text="${comment.content}"></p>
+            <span class="text-muted" th:text="${#temporals.format(comment.createdDate, 'yyyy.MM.dd HH:mm')}"></span>
+            <th:block th:if="${comment.replyCount > 0}">
+              <div class="text-end" name="showReply"
+                   th:commentId="${comment.id}" th:id="${'replyBtn-'+comment.id}"
+                   th:onclick="getReply([[${comment.id}]])">
+                <i class="fas fa-plus"></i>
+                <span class="fw-bold mx-auto" th:text="${comment.replyCount + '개의 답글 보기'}"></span>
+              </div>
+            </th:block>
+            <th:block th:unless="${comment.replyCount > 0}">
+              <div class="text-end" name="showReply"
+                   th:commentId="${comment.id}" th:id="${'replyBtn-'+comment.id}"
+                   th:onclick="toggleReplyForm([[${comment.id}]])">
+                <i class="fas fa-plus"></i>
+                <span th:commentId="${comment.id}" name="replyBtn" class="text-end">답글 달기</span>
+              </div>
+            </th:block>
+            <div th:commentId="${comment.id}" th:id="${'hideBtn-' + comment.id}"
+                 th:onclick="hideReply([[${comment.id}]])" class="d-none text-end">
+              <i class="fas fa-minus"></i><span>숨기기</span>
+            </div>
+
+            <!-- 답글 목록 -->
+            <div th:id="${'reply-' + comment.id}"></div>
+            <!-- 답글 작성 폼 -->
+            <section class="justify-content-between align-items-center my-1 text-end d-none"
+                     th:id="${'reply-form-'+ comment.id}">
+              <figure class="text-start">
+                <img
+                    th:src="${#authentication.principal.picture != null ? #authentication.principal.picture : '/images/profile.png'}"
+                    class="rounded-circle" width="30" height="30" alt="profile image">
+                <span class="fw-bold" th:text="${#authentication.principal.username}"></span>
+              </figure>
+              <figure class="text-start mb-1">
+                <span th:id="${'tag-' + comment.id}"
+                      class="btn btn-sm bg-dark bg-opacity-10 fw-bold mb-1 d-none"></span>
+              </figure>
+              <textarea rows="2" name="content" placeholder="댓글을 작성하세요." class="form-control col-auto mb-2"></textarea>
+              <figure>
+                <button class="btn btn-sm" th:onclick="hideReply([[${comment.id}]])">취소</button>
+                <button class="btn btn-sm" th:onclick="saveReply([[${comment.id}]], [[${comment.author.id}]])">댓글 작성</button>
+              </figure>
+            </section>
+            <!-- 댓글 삭제 모달 -->
+            <div class="modal fade text-dark" id="deleteCommentModal" tabindex="-1"
+                 aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="deleteCommentModalLabel">댓글 삭제</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    댓글을 삭제 하시겠습니까?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button class="btn btn-danger" id="delete-comment-btn" type="submit">
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 댓글 삭제 모달 끝-->
+          </div>
+        </div>
+      </th:block>
+      <!-- 댓글 끝 -->
+    </div>
+    <div class="card-footer text-muted d-flex justify-content-between">
+      <!--      <div th:if="@{ ${#authentication.getPrincipal().id == post.writer.id-->
+      <div th:if="@{ ${#authentication.getPrincipal().id == post.author.id
+         || #authorization.expression('hasRole(''ROLE_ADMIN'')')} }">
+        <a th:href="@{/post/update/{id}(id=${post.id})}"
+           class="btn btn-warning">수정</a>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#checkModal">
+          삭제
+        </button>
+
+        <div aria-hidden="true" aria-labelledby="deleteModal" class="modal fade" id="checkModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5 fw-bold" id="deleteModal">삭제 확인</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body fw-bold">
+                정말 삭제 하시겠습니까?
+                삭제시 복구가 불가능합니다.
+              </div>
+              <div class="modal-footer">
+                <form th:action="@{/post/delete/{id}(id=${post.id})}" method="post">
+                  <button type="submit" class="btn btn-primary">예</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a th:href="@{/post/list(size=${pageable.pageSize}, page=${pageable.pageNumber}, sort=${sort},
+      searchPeriod=${searchCondition.searchPeriod}, searchType=${searchCondition.searchType},
+      keyword=${searchCondition.keyword})}"
+         class="btn btn-primary">목록</a>
+    </div>
+  </div>
+  <script src="/js/posts/postDetail.js"></script>
+  <script src="/js/posts/comment.js"></script>
+  <script src="/js/posts/reply.js"></script>
+  <script src="/js/utils.js"></script>
+</main>
+
+</html>

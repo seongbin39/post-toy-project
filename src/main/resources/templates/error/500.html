@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base_layout}"
+      lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Error</title>
+  <meta name="viewport"
+        content="width=device-width, maximum-scale=1.0, minimum-scale=1, user-scalable=yes,initial-scale=1.0"/>
+</head>
+
+<div layout:fragment="content" class="content">
+  <div class="p-3">
+    <h1>에러가 발생했습니다.</h1>
+    <p>잠시 후 다시 시도해주세요.</p>
+    <p>문제가 지속되면 관리자에게 문의하세요.</p>
+    <button class="btn btn-primary" onclick="history.back()">뒤로가기</button>
+    <button class="btn btn-primary" onclick="location.href='/';">홈으로</button>
+  </div>
+</div>
+
+</html>
