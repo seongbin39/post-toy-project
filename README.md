@@ -3,6 +3,7 @@
 ## 프로젝트 URL
 
 - [https://www.seong.store](https://www.seong.store)
+- 로그인 테스트(user@seong.store, user123@)
 
 ## 1. 프로젝트 소개
 
